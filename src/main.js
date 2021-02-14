@@ -10,8 +10,9 @@ import Ingredients from './components/Ingredient/Ingredients.vue'
 import Diets from './components/Diet/Diets.vue'
 import Stats from './components/Stats/Stats.vue'
 import ValidateIngredient from './components/Ingredient/ValidateIngredient.vue'
-import AddIngredient from './components/Ingredient/AddIngredient.vue'
+import AddIngredientTab from './components/Ingredient/AddIngredientTab.vue'
 import AddRecipe from './components/Recipe/AddRecipe.vue'
+import FanarRecipe from './components/Recipe/FanarRecipe.vue'
 import Login from './components/Login.vue'
 import VueSidebarMenu from 'vue-sidebar-menu'
 import Axios from 'axios'
@@ -26,10 +27,24 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import VueJsDialog from 'vuejs-dialog';
 import 'vuejs-dialog/dist/vuejs-dialog.min.css';
 import Constants from "@/plugins/Constants";
+import Loading from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/vue-loading.css';
+import 'viewerjs/dist/viewer.css';
+import Viewer from 'v-viewer';
+import VModal from 'vue-js-modal'
+import VueCropper from 'vue-cropperjs';
+import 'cropperjs/dist/cropper.css';
+import VueConfirmDialog from 'vue-confirm-dialog'
+
+
 
 library.add(faUserSecret)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
+Vue.component('loading-overlay', Loading)
+
+Vue.use(VueConfirmDialog)
+Vue.component('vue-confirm-dialog', VueConfirmDialog.default)
 
 Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
@@ -37,6 +52,9 @@ Vue.use(VueSidebarMenu)
 Vue.use(VueRouter)
 Vue.use(VueJsDialog)
 Vue.use(Constants)
+Vue.use(Viewer)
+Vue.use(VModal)
+Vue.component(VueCropper);
 
 Vue.config.productionTip = false
 Vue.prototype.$http = Axios;
@@ -54,7 +72,8 @@ const routes = [
   { path: '/exportData',  name:'Export Data', component: ExportData, props: true, meta: {requiresAuth: true}},
   { path: '/validateRecipe', name:'Validate Recipe', component: ValidateRecipe, props: true},
   { path: '/addRecipe', name:'Add Recipe', component: AddRecipe, props: true},
-  { path: '/addIngredient', name:'Add Ingredient', component: AddIngredient, props: true},
+  { path: '/fanarRecipe', name:'Sneaky Fananço', component: FanarRecipe, props: true},
+  { path: '/addIngredient', name:'Add Ingredient', component: AddIngredientTab, props: true},
   { path: '/ingredients',  name:'Ingredients', component: Ingredients, props: true, meta: {requiresAuth: true}},
   { path: '/validateIngredient', name:'Validate Ingredient', component: ValidateIngredient, props: true},
   { path: '/login',  name:'Login', component: Login, props: true}

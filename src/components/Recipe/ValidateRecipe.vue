@@ -28,24 +28,6 @@
 
       <b-col lg="6" class="my-1">
         <b-form-group
-          label="Initial sort"
-          label-cols-sm="3"
-          label-align-sm="right"
-          label-size="sm"
-          label-for="initialSortSelect"
-          class="mb-0"
-        >
-          <b-form-select
-            v-model="sortDirection"
-            id="initialSortSelect"
-            size="sm"
-            :options="['asc', 'desc', 'last']"
-          ></b-form-select>
-        </b-form-group>
-      </b-col>
-
-      <b-col lg="6" class="my-1">
-        <b-form-group
           label="Filter"
           label-cols-sm="3"
           label-align-sm="right"
@@ -64,21 +46,6 @@
               <b-button :disabled="!filter" @click="filter = ''">Clear</b-button>
             </b-input-group-append>
           </b-input-group>
-        </b-form-group>
-      </b-col>
-
-      <b-col lg="6" class="my-1">
-        <b-form-group
-          label="Filter On"
-          label-cols-sm="3"
-          label-align-sm="right"
-          label-size="sm"
-          description="Leave all unchecked to filter on all data"
-          class="mb-0">
-          <b-form-checkbox-group v-model="filterOn" class="mt-1">
-            <b-form-checkbox value="id">Id</b-form-checkbox>
-            <b-form-checkbox value="validated">Valid</b-form-checkbox>
-          </b-form-checkbox-group>
         </b-form-group>
       </b-col>
 
@@ -156,8 +123,8 @@
               <p class="text-left mx-10" v-html="recipeToText(row.item).replace(/(?:\r\n|\r|\n)/g, '<br />')"></p>
             </b-col> 
             <b-col cols=12>
-                <b-button variant="danger" v-on:click="row.item.recipe.validated=false; handleSubmit(row.item.recipe)" v-show="row.item.recipe.validated">Invalidate Recipe</b-button>
-                <b-button variant="success" v-on:click="row.item.recipe.validated=true; handleSubmit(row.item.recipe)" v-show="!row.item.recipe.validated">Validate Recipe</b-button>
+                <b-button variant="danger" v-on:click="row.item.recipe.is_valid=false; handleSubmit(row.item.recipe)" v-show="row.item.recipe.is_valid">Invalidate Recipe</b-button>
+                <b-button variant="success" v-on:click="row.item.recipe.is_valid=true; handleSubmit(row.item.recipe)" v-show="!row.item.recipe.is_valid">Validate Recipe</b-button>
             </b-col>
           </b-row>
         </b-card>
@@ -185,7 +152,7 @@ import axios from 'axios'
         fields: [
           { key: 'id', label: 'Recipe Id', sortable: true, class: 'text-center' },
           { key: 'name', label: 'Recipe Name', sortable: true, class: 'text-center'},
-          { key: 'validated', label: 'Valid', sortable: true, class: 'text-center' },
+          { key: 'is_valid', label: 'Valid', sortable: true, class: 'text-center' },
           { key: 'actions', label: 'Actions' }
         ],
         totalRows: 1,
@@ -268,7 +235,8 @@ import axios from 'axios'
       },
       recipeToText(item){
         const recipe = item.recipe
-        return "<b>id:</b>" + recipe.id + "\n<b>name:</b>: " + recipe.name + "\n<b>dish:</b> " + (recipe.dishType != null ? recipe.dishType.name : "null") + "\n<b>validated:</b> " + recipe.validated + "\n<b>readyIn:</b> " + recipe.readyInMinutes + "\n<b>prepareTime:</b> " + recipe.prepareInMinutes + "\n<b>description:</b> " + recipe.description + "\n<b>difficulty:</b> " + recipe.difficulty + "\n<b>serves:</b> " + recipe.serves + "\n<b>utensils:</b> " + recipe.utensils.map(u => u.name).join(', ') + "\n<b>ingredients:</b> " + recipe.ingredients.map(i => "" + i.quantity + " " + i.measureName + " " + i.ingredientName).join('; ') + "\n<b>steps:</b> " + recipe.instructions.length  
+        console.log(recipe)
+        return "<b>id:</b>" + recipe.id + "\n<b>name:</b> " + recipe.name + "\n<b>dish:</b> " + (recipe.dishType != null ? recipe.dishType.name : "null") + "\n<b>is_valid:</b> " + recipe.is_valid + "\n<b>readyIn:</b> " + recipe.readyInMinutes + "\n<b>prepareTime:</b> " + recipe.prepareInMinutes + "\n<b>description:</b> " + recipe.description + "\n<b>difficulty:</b> " + recipe.difficulty + "\n<b>serves:</b> " + recipe.serves + "\n<b>utensils:</b> " + recipe.utensils.map(u => u.name).join(', ') + "\n<b>ingredients:</b> " + recipe.ingredients.map(i => "" + i.quantity + " " + i.measureName + " " + i.ingredientName).join('; ') + "\n<b>steps:</b> " + recipe.instructions.length  
       }
     }
   }

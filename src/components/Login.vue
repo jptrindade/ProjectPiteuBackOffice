@@ -3,7 +3,7 @@
   <v-app id="inspire">
     <h1>Welcome to Project Piteu Backoffice</h1>
     <v-app id="inspire">
-      <v-content>
+      <v-main>
         <v-container
           fluid
         >
@@ -52,7 +52,7 @@
             </v-col>
           </v-row>
         </v-container>
-      </v-content>
+      </v-main>
     </v-app>
   </v-app>
 </div>

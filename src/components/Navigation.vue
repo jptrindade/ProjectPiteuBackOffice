@@ -48,6 +48,11 @@ import { SidebarMenu } from 'vue-sidebar-menu'
                           href: '/addRecipe',
                           title: 'Add Recipe',
                           icon: 'fa fa-plus',
+                      },
+                      {
+                          href: '/fanarRecipe',
+                          title: 'Fanar Recipe',
+                          icon: 'fa fa-exclamation-triangle',
                       }
                   ]
               },

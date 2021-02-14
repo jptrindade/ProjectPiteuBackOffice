@@ -8,9 +8,9 @@
         :set-collapsed="setCollapsed"
         />
       <div id="main-content" class="d-flex fill-height ma-0" :class="{'collapsed' : collapsed}">
-        <v-content fill-height :class="{'collapsed' : collapsed}">
+        <v-main fill-height :class="{'collapsed' : collapsed}">
             <router-view/>
-        </v-content>
+        </v-main>
       </div>
     </div>
   </v-app>

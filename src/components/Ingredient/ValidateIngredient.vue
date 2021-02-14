@@ -28,24 +28,6 @@
 
       <b-col lg="6" class="my-1">
         <b-form-group
-          label="Initial sort"
-          label-cols-sm="3"
-          label-align-sm="right"
-          label-size="sm"
-          label-for="initialSortSelect"
-          class="mb-0"
-        >
-          <b-form-select
-            v-model="sortDirection"
-            id="initialSortSelect"
-            size="sm"
-            :options="['asc', 'desc', 'last']"
-          ></b-form-select>
-        </b-form-group>
-      </b-col>
-
-      <b-col lg="6" class="my-1">
-        <b-form-group
           label="Filter"
           label-cols-sm="3"
           label-align-sm="right"
@@ -64,21 +46,6 @@
               <b-button :disabled="!filter" @click="filter = ''">Clear</b-button>
             </b-input-group-append>
           </b-input-group>
-        </b-form-group>
-      </b-col>
-
-      <b-col lg="6" class="my-1">
-        <b-form-group
-          label="Filter On"
-          label-cols-sm="3"
-          label-align-sm="right"
-          label-size="sm"
-          description="Leave all unchecked to filter on all data"
-          class="mb-0">
-          <b-form-checkbox-group v-model="filterOn" class="mt-1">
-            <b-form-checkbox value="id">Id</b-form-checkbox>
-            <b-form-checkbox value="category">Category</b-form-checkbox>
-          </b-form-checkbox-group>
         </b-form-group>
       </b-col>
 
@@ -139,7 +106,7 @@
 
       <template v-slot:cell(actions)="row">
 
-        <b-button variant="warning" size="sm" @click="info(row.item)" class="mr-1">
+        <b-button variant="warning" size="sm" @click="editIngredient(row.item)" class="mr-1">
           Edit
         </b-button>
         <b-button variant="outline-primary" size="sm" @click="row.toggleDetails">
@@ -151,148 +118,125 @@
         <b-card>
           <b-row align-v='center' justify='center'>
             <b-col cols="4">
-              <b-img thumbnail fluid right :src=row.item.img></b-img>
+              <b-img thumbnail fluid right style="max-height:300px" :src=row.item.img></b-img>
             </b-col>
             <b-col cols="4">
               <p class="text-left mx-10" v-html="showIngredientDetails(row.item).replace(/(?:\r\n|\r|\n)/g, '<br />')"></p>
+            </b-col>
+            <b-col cols=12>
+                <b-button variant="danger" v-on:click="row.item.is_valid=false; handleSubmit(row.item)" v-show="row.item.is_valid">Invalidate Ingredient</b-button>
+                <b-button variant="success" v-on:click="row.item.is_valid=true; handleSubmit(row.item)" v-show="!row.item.is_valid">Validate Ingredient</b-button>
             </b-col>
           </b-row>
         </b-card>
       </template>
     </b-table>
-    <!-- EDIT INGREDIENT -->
-    <b-modal 
-      v-model="show"
-      ok-title="Update Ingredient"
-      @ok="handleSubmit"
-      >
-      <div v-if="editedIngredient">
-        <b-row align='center'>
-            <b-col cols="4">
-              <img align='right' :src=editedIngredient.img>
-            </b-col>
-            <b-col cols="8">
-              <p class="text-left mx-10" v-html="showIngredientDetails(editedIngredient).replace(/(?:\r\n|\r|\n)/g, '<br />')"></p>
-            </b-col>
-          </b-row>
-        <!--<p><b>Ingredient name:</b> {{ingredient.name}}</p>
-        <p><b>Category:</b> {{ingredient.category}}</p>-->
-        <b-row class="mb-1">
-          <b-col cols="12"><b-form-input v-model="editedIngredient.img" id="input-small" size="sm" placeholder="Image url"></b-form-input></b-col>
-          <b-col cols="3">Category</b-col>
-          <b-col>
-            <b-form-select
-                v-model="selectedCategory"
-                :options="categoriesAsOptions"
-                value-field="value"
-                text-field="text"
-                v-on:change="setCategory"
-              ></b-form-select>
-          </b-col>
-        </b-row>
-        <b-row class="mb-1">
-          <b-col cols="12">
-            <b-form-group label="Exclude from Diets">
-              <b-form-checkbox
-              v-for="diet in diets"
-              v-model="selectedDiets"
-              :key="diet.id"
-              :value="diet"
-              inline>
-                {{ diet.name }}
-              </b-form-checkbox>
-            </b-form-group>
-          </b-col>
-        </b-row>
-      </div>
-    </b-modal>
   </b-container>
 </div>
 </template>
 
 <script>
 import axios from 'axios'
-  export default {
-    data() {
-      return {
-        err : null,
-        success : null,
-        deploy_to : process.env.VUE_APP_DATABASE,
-        items: [],
-        show: false,
-        ingredient: null,
-        editedIngredient: null, //this.ingredient before submission
-        categoriesAsOptions: [],
-        categories: [],
-        diets: [],
-        selectedCategory: "",
-        selectedDiets: [],
-        fields: [
-          { key: 'id', label: 'Ingredient Id', sortable: true, class: 'text-center' },
-          { key: 'name', label: 'Name', sortable: true, class: 'text-center' },
-          { key: 'category.name', label: 'Category', sortable: true, class: 'text-center' },
-          { key: 'actions', label: 'Actions' }
-        ],
-        totalRows: 1,
-        currentPage: 1,
-        perPage: 10,
-        pageOptions: [5, 10, 15],
-        sortBy: 'id',
-        sortDesc: false,
-        sortDirection: 'asc',
-        filter: null,
-        filterOn: []
-      }
-    },
-    computed: {
-      sortOptions() {
-        // Create an options list from our fields
-        return this.fields
-          .filter(f => f.sortable)
-          .map(f => {
-            return { text: f.label, value: f.key }
-          })
-      }
-    },
-    mounted (){
-        axios.get(this.deploy_to + 'backoffice/ingredients/',{headers: {
-                'Authorization': `${this.$store.getters.getTokenToSend}`
-            }})
-            .then(response => {
-                this.items = response.data
-                this.totalRows = this.items.length
-                })
-            .catch(error => {
-                this.showErr(error)
-                console.log(error)
-            }),
-            axios.get(this.deploy_to + 'category/', {headers: {
-                'Authorization': `Token ${this.$store.getters.getToken}`
-            }}).then(resp => {
-                this.categories = resp.data.results
-                for(var i=0;i<this.categories.length;i++){
-                  this.categoriesAsOptions.push({"value":this.categories[i],"text":this.categories[i].name})
-                }
-            }).catch(errors => {
-                this.showErr(errors)
-                console.log(errors)
-            }),
-            axios.get(this.deploy_to + 'diet/', {headers: {
-                'Authorization': `Token ${this.$store.getters.getToken}`
-            }}).then(resp => {
-                this.diets = resp.data.results
-            }).catch(errors => {
-                this.showErr(errors)
-                console.log(errors)
-            })
-    },
+import Vue from 'vue'
+import { getSignedUrl, uploadImageFileToS3, uploadImageUrlToS3 } from '@/helpers/s3-image-storage'
+import AddIngredientCore from '../Ingredient/AddIngredientCore.vue'
 
-    methods: {
-      info(item) {
-        this.editedIngredient = item
-        this.selectedCategory = {"value":this.editedIngredient.category,"text":this.editedIngredient.category.name}
-        this.selectedDiets = this.editedIngredient.diets
-        this.show=true
+
+export default {
+  data() {
+    return {
+      err : null,
+      success : null,
+      deploy_to : process.env.VUE_APP_DATABASE,
+      items: [],
+      show: false,
+      uploadedImgEdit: null,
+      ingredient: null,
+      editedIngredient: null, //this.ingredient before submission
+      categoriesAsOptions: [],
+      categories: [],
+      diets: [],
+      selectedCategory: "",
+      selectedDiets: [],
+      fields: [
+        { key: 'id', label: 'Ingredient Id', sortable: true, class: 'text-center' },
+        { key: 'name', label: 'Name', sortable: true, class: 'text-center' },
+        { key: 'category.name', label: 'Category', sortable: true, class: 'text-center' },
+        { key: 'actions', label: 'Actions' }
+      ],
+      totalRows: 1,
+      currentPage: 1,
+      perPage: 10,
+      pageOptions: [5, 10, 15],
+      sortBy: 'id',
+      sortDesc: false,
+      sortDirection: 'asc',
+      filter: null,
+      filterOn: []
+    }
+  },
+  components: {
+    AddIngredientCore
+  },
+  computed: {
+    sortOptions() {
+      // Create an options list from our fields
+      return this.fields
+        .filter(f => f.sortable)
+        .map(f => {
+          return { text: f.label, value: f.key }
+        })
+    }
+  },
+  mounted (){
+      axios.get(this.deploy_to + 'backoffice/ingredients/',{headers: {
+              'Authorization': `${this.$store.getters.getTokenToSend}`
+          }})
+          .then(response => {
+              this.items = response.data
+              this.totalRows = this.items.length
+              })
+          .catch(error => {
+              this.showErr(error)
+              console.log(error)
+          }),
+          axios.get(this.deploy_to + 'category/', {headers: {
+              'Authorization': `Token ${this.$store.getters.getToken}`
+          }}).then(resp => {
+              this.categories = resp.data.results
+              for(var i=0;i<this.categories.length;i++){
+                this.categoriesAsOptions.push({"value":this.categories[i],"text":this.categories[i].name})
+              }
+          }).catch(errors => {
+              this.showErr(errors)
+              console.log(errors)
+          }),
+          axios.get(this.deploy_to + 'diet/', {headers: {
+              'Authorization': `Token ${this.$store.getters.getToken}`
+          }}).then(resp => {
+              this.diets = resp.data.results
+          }).catch(errors => {
+              this.showErr(errors)
+              console.log(errors)
+          })
+  },
+  methods: {
+      editIngredient(ingredient) {
+        console.log(ingredient)
+        this.$modal.show(
+            AddIngredientCore,
+            {initialName: ingredient.name, initialUrl: ingredient.img, initialCategory: ingredient.category, initialDiets: ingredient.diets, initialEditIngredientId: ingredient.id},
+            { width: "500", height: "auto", adaptive: true, scrollable: true},
+            { 'before-close': this.ingredientAdded }
+
+        );
+      },
+      ingredientAdded(event){
+        if(event && event.params.paramList){
+          let ingredient = event.params.paramList[0]
+          let requestId = event.params.paramList[1]
+          console.log("Returned from ingredient added successfully - " + ingredient.name)
+        }
       },
       showErr(msg){
           this.err = msg
@@ -303,7 +247,8 @@ import axios from 'axios'
           setTimeout(() => this.success = null, 3000);
       },
       showIngredientDetails(item){
-        var details = "id:" + item.id + "\nname: " + item.name + "\ncategory: " + item.category.name + "\ndiets: " + item.diets.map(d => d.name) + "\ndeleted: " + item.is_deleted 
+        this.editedIngredient = item
+        var details = "id:" + item.id + "\nname: " + item.name + "\ncategory: " + item.category.name + "\ndiets: " + item.diets.map(d => d.name) + "\nvalid: " + item.is_valid + "\ndeleted: " + item.is_deleted 
         return details
       },
       setCategory(){
@@ -314,11 +259,21 @@ import axios from 'axios'
         this.totalRows = filteredItems.length
         this.currentPage = 1
       },
-      handleSubmit() {
+      async handleSubmit() {
         //todo add confirm modal before submit
         this.editedIngredient.diets = this.selectedDiets
         this.ingredient = this.editedIngredient
-        axios.post(this.deploy_to + 'backoffice/edit/ingredient/'+this.ingredient.id+"/", this.ingredient, {headers: {
+
+        if(this.editedIngredient.originalImg != this.editedIngredient.img){
+          if(this.uploadedImgEdit){
+            //Upload local img to S3
+            let fileName = this.generateImageName(this.uploadedImgEdit, this.editedIngredient)
+            this.editedIngredient.img = await uploadImageFileToS3(this.deploy_to, this.$store.getters.getToken, this.uploadedImgEdit, fileName)
+          } else {
+            //TODO Upload external img to S3 INSTEAD OF using external url
+          }
+        }
+        axios.post(this.deploy_to + 'backoffice/edit/ingredient/'+this.ingredient.id+"/", this.editedIngredient, {headers: {
                 'Authorization': `Token ${this.$store.getters.getToken}`}})
                     .then((response) => {
                         this.showSuccess("Success")
@@ -328,7 +283,21 @@ import axios from 'axios'
                         this.showErr(errors)
                         console.log(errors.status)
                     })
-      }
-    }
+    },
+    preview_edit_image(file){
+          if(file){
+              this.editedIngredient.img = URL.createObjectURL(file)
+              this.uploadedImgEdit = file
+          } else {
+              this.editedIngredient.img = this.editedIngredient.originalImg
+              this.uploadedImgEdit = null
+          }
+    },
+    generateImageName(file, ingredient){
+          const fileExtension = "." + file.name.split('.').pop();
+          const randomInt = "_" + Math.floor(Math.random() * 10000)
+          return ingredient.category.id + "_" + ingredient.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() + randomInt + fileExtension
+    },
   }
+}
 </script>

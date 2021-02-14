@@ -1,37 +1,56 @@
 <template>
     <div class="container">
-        <button class="btn btn-info" @click="downloadDb()">Export db</button>
+        <b-dropdown id="exportOption"
+                  name="exportOption"
+                  v-model="selected_option_to_export"
+                  text="Select data to export"
+                  variant="primary"
+                  class="m-md-2"
+                  :disabled=isExportButtonDisabled>
+        <b-dropdown-item disabled value="0">Select an item</b-dropdown-item>
+        <b-dropdown-item v-for="option in options_to_export" 
+                            :key="option.value" 
+                            :value="option.value"
+                            @click="selected_option_to_export = option.value; exportData()">
+            {{option.text}}
+        </b-dropdown-item>           
+        </b-dropdown> 
     </div>
 </template>
 
 <script>
 import axios from 'axios'
 
-
 export default {
     name: "ExportData",
+    data (){
+        return{
+			deploy_to : process.env.VUE_APP_DATABASE,
+            options_to_export : [{"text":"Recipes","value":"recipe"},{"text":"Ingredients","value":"ingredient"},{"text":"Diets","value":"diet"},{"text":"DishTypes","value":"dishType"},{"text":"Utensils","value":"utensil"},{"text":"Categories","value":"category"},{"text":"Measures","value":"measure"},{"text":"Users","value":"user"}],
+            selected_option_to_export : null,
+            isExportButtonDisabled : false
+        }
+    },
     methods: {
-        downloadDb(){
-            axios({
-                method: 'get',headers :{headers: {
-                    'Authorization': `Token ${this.$store.getters.getToken}`
-                }},
-                url: process.env.VUE_APP_DATABASE+'exportdb',
-                responseType: 'arraybuffer'
-
-            })
+        exportData(){
+            this.isExportButtonDisabled = true
+            axios.get(this.deploy_to + 'exportdata/'+this.selected_option_to_export, {headers: {
+				'Authorization': `${this.$store.getters.getTokenToSend}`
+		}})
             .then(response => {
-                
-                this.forceFileDownload(response,"db-backup.json")
+                this.forceFileDownload(response.data,this.selected_option_to_export+".json")
+                this.isExportButtonDisabled = false
                 
             })
-            .catch(() => console.log('error occured'+process.env.VUE_APP_DATABASE+'exportdb'))
+            .catch(() => { console.log('error occured'+process.env.VUE_APP_DATABASE+'exportdata'); 
+                this.isExportButtonDisabled = false })
         },
-        forceFileDownload(response,fileName){
-            const url = window.URL.createObjectURL(new Blob([response.data]))
+        forceFileDownload(data,fileName){
+            var blob = new Blob([decodeURIComponent(encodeURI(JSON.stringify([data])))])
+            const url = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
-            link.setAttribute('download', fileName) //or any other extension
+            link.setAttribute('download', fileName)
             document.body.appendChild(link)
             link.click()
         },
