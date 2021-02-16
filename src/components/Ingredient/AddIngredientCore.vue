@@ -294,9 +294,7 @@ export default {
             );
         },
         callbackFromImageSelection(event){
-            this.images = []
-            this.imgIndex = 0
-            if(event && event.params && event.params.allImages){
+            if(event && event.params && event.params.allImages && event.params.allImages.length){
                 this.currentIngredient.img = event.params.allImages[0].url
                 this.uploadedFile = event.params.allImages[0].file
             }
