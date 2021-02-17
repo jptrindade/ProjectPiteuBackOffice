@@ -1108,7 +1108,7 @@ export default {
             );
         },
         callbackFromImageSelection(event){
-	        if(event && event.params && event.params.allImages && event.params.allImages.length){
+            if(event && event.params && event.params.allImages && event.params.allImages.length){
                 this.images = event.params.allImages
                 this.imgIndex = 0
             }

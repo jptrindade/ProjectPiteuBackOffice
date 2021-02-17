@@ -54,7 +54,7 @@
 						</v-row>
 
 						<v-row no-gutters >
-							<v-text-field class="pa-0 ma-0" label="URL" v-model="newUrl" @change="download_image"></v-text-field>
+							<v-text-field class="pa-0 ma-0" label="URL" v-model="newUrl" @inp="download_image"></v-text-field>
 						</v-row>
 					</v-col>
 
@@ -66,9 +66,9 @@
 				<v-row v-if="newUrl">
 					<v-spacer></v-spacer>
 					<v-col no-gutters cols="6" align="center">
-						<v-btn d-flex @click="addMainImage">Main Image</v-btn>
+						<v-btn :disabled="newFile == null" d-flex @click="addMainImage">Main Image</v-btn>
 						&nbsp;
-						<v-btn @click="addAlternativeImage">Alternative Image</v-btn>
+						<v-btn :disabled="newFile == null" @click="addAlternativeImage">Alternative Image</v-btn>
 					</v-col>
 				
 				</v-row>
@@ -185,6 +185,7 @@ export default {
 		},
 		download_image(){
             if(this.newUrl != ""){
+
                 utils.downloadImageFile(this.newUrl, this);
             }
         },
