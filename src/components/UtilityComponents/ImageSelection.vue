@@ -54,7 +54,7 @@
 						</v-row>
 
 						<v-row no-gutters >
-							<v-text-field class="pa-0 ma-0" label="URL" v-model="newUrl" @inp="download_image"></v-text-field>
+							<v-text-field class="pa-0 ma-0" label="URL" v-model="newUrl" @input="download_image"></v-text-field>
 						</v-row>
 					</v-col>
 
