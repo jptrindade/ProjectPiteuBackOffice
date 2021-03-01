@@ -301,6 +301,9 @@
                                     </v-card>
                                 </v-col>
                             </v-row>
+
+                            <v-img v-if="urlToLoadTmpImage" contain height="200px" :src="urlToLoadTmpImage"></v-img>
+                        
                         </v-container>
                     </v-form>
                 </v-card>
@@ -357,6 +360,8 @@ export default {
             ingredientGroup: "",
             recipeGroups: [],
             newRecipeGroup: "",
+            urlToLoadTmpImage: "",
+            tmpFile: undefined,
 
             //When add new ingredient popup appears
             popupShowAddIngredient: false,
@@ -538,14 +543,36 @@ export default {
             
             return similarRecipes;
         },
+        //Used to tmp store downloaded external images
+        setLocalUrl(url){
+            this.urlToLoadTmpImage = url;
+        },
+        setLocalFile(file){
+            this.tmpFile = file
+        },
         async generateImageUrl(url, file){
             if(url && url.includes(Vue.Constants.STORAGE_PROVIDER)){   //Is Internal Url, no need to upload
                 return url
             }
 
-            let fileName = this.generateImageName(file)
-            url = await uploadImageFileToS3(this.deploy_to, this.$store.getters.getToken, file, fileName)
-            return url
+            if(file){
+                let fileName = this.generateImageName(file)
+                url = await uploadImageFileToS3(this.deploy_to, this.$store.getters.getToken, file, fileName)
+                return url
+            }
+
+            //External Url
+            if(url){
+                const delay = ms => new Promise(res => setTimeout(res, ms));
+                utils.downloadImageFile(url, this)
+                while(!this.tmpFile){
+                    await delay(100) 
+                }
+                const fileName = this.generateImageName(this.tmpFile)
+                url = await uploadImageFileToS3(this.deploy_to, this.$store.getters.getToken, this.tmpFile, fileName)
+                this.tmpFile = null
+                return url
+            }
         },
         generateImageName(file){
             const fileExtension = "." + file.name.split('.').pop();
