@@ -232,11 +232,14 @@ export default {
         );
       },
       ingredientAdded(event){
-        if(event && event.params.paramList){
-          let ingredient = event.params.paramList[0]
-          let requestId = event.params.paramList[1]
-          console.log("Returned from ingredient added successfully - " + ingredient.name)
+        const eventParams = event?.params?.paramList;
+        if(!eventParams){
+          console.log("Event/params is undefined");
+          return
         }
+        let ingredient = eventParams[0]
+        let requestId = eventParams[1]
+        console.log("Returned from ingredient added successfully - " + ingredient.name)
       },
       showErr(msg){
           this.err = msg
