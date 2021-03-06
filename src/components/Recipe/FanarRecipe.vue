@@ -102,7 +102,6 @@ export default {
 				"servings": "4",
 				"totalTime": "40",
 				"prepTime": "15",
-				"utensils": null,
 				"instructions": {
 					"1": "Preheat the oven to 160C/320F. Trim the chicken breasts to remove any fatty parts.",
 					"2": "Whisk the egg lightly in a shallow bowl.",

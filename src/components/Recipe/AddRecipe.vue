@@ -98,19 +98,6 @@
                 <v-card class="fill-height px-5 pt-8">
                     <v-form>
                         <v-container>
-                            <v-row>
-                            <v-col cols="12">
-                                <v-card>
-                                    <v-card-title>Fill utensils required</v-card-title>
-                                        <v-select class="mx-3" label="Utensils" v-model="utensils"
-                                            :items="getUtensils()"
-                                            item-text="name"
-                                            item-value="id"
-                                            multiple>
-                                        </v-select>
-                                </v-card>
-                            </v-col>
-                            </v-row>
                             
                             <!-- ADD NEW INGREDIENT -->
                             <v-row>
@@ -337,7 +324,6 @@ export default {
             numberServes: null,
             prepTime: null,
             totalTime: null, 
-            utensils: [],
             difficultyOptions: ['Easy', 'Medium', 'Hard'],
             description: null,
             currentIngredient: null,
@@ -349,7 +335,6 @@ export default {
             raw_instructions: null,
             possible_ingredients:[],
             possible_measures:[],
-            possible_utensils:[],
             possible_dishes: [],
             err: null,
             addedIngredientErr: null,
@@ -381,24 +366,22 @@ export default {
         const requestMeasure = axios.get(this.deploy_to + 'measure/', {headers: {
                 'Authorization': `${this.$store.getters.getTokenToSend}`
         }})
-        const requestUtensils = axios.get(this.deploy_to + 'utensil/', {headers: {
-                'Authorization': `${this.$store.getters.getTokenToSend}`
-        }})
+
         const requestCuisines = axios.get(this.deploy_to + 'utensil/', {headers: {
                 'Authorization': `${this.$store.getters.getTokenToSend}`
         }})
+        
         const requestDishes = axios.get(this.deploy_to + 'dishtype/',{headers: {
                 'Authorization': `${this.$store.getters.getTokenToSend}`
         }})
 
-        await axios.all([requestIngredient, requestMeasure, requestCuisines, requestUtensils, requestDishes],{headers: {
+        await axios.all([requestIngredient, requestMeasure, requestCuisines, requestDishes],{headers: {
                     'Authorization': `Token ${this.$store.getters.getToken}`
                 }})
             .then(axios.spread( (...responses) => {
                 this.possible_ingredients = responses[0].data
                 this.possible_measures = responses[1].data.results
                 this.possible_cuisines = responses[2].data.results
-                this.possible_utensils = responses[3].data.results
                 this.possible_dishes = responses[4].data.results
             })).catch(errors => {
                 console.log("ERROR request tables: " +  errors)
@@ -436,7 +419,6 @@ export default {
             this.prepTime = null
             this.totalTime = null
             this.difficulty = null
-            this.utensils = []
             this.added_ingredients = []
             this.instructions = []
             this.measure = null
@@ -471,7 +453,6 @@ export default {
                 serves : this.numberServes,
                 prepareInMinutes : this.prepTime,
                 readyInMinutes : this.totalTime,
-                utensils: this.parseUtensils(),
                 recipeIngredients: this.parseRecipeIngredients(),
                 instructions: this.parseInstructions(),
                 is_valid : true
@@ -681,14 +662,6 @@ export default {
             });
             return this.possible_dishes;
         },
-        getUtensils() {
-            //Wait for server to respond
-            var wait = (ms) => new Promise((r) => setTimeout(r, ms));
-            wait(1000).then(() => {
-                return this.possible_utensils;
-            });
-            return this.possible_utensils;
-        },
         getMeasures() {
             //Wait for server to respond
             var wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -775,7 +748,6 @@ export default {
                 this.numberServes = recipe.serves
                 this.prepTime = recipe.prepareInMinutes
                 this.totalTime = recipe.readyInMinutes
-                this.utensils = recipe.utensils.map(u => u.id)
                 this.description = recipe.description
                 this.added_ingredients = this.importAddedIngredients(recipe.ingredients)
                 this.importInternalInstructions(recipe.instructions)
@@ -1005,9 +977,6 @@ export default {
             console.log(parsedInstructions)
 
             return parsedInstructions;
-        },
-        parseUtensils(){
-            return this.possible_utensils.filter(u => this.utensils.indexOf(u.id) > 0)
         },
         navigateImages(moveIndex){
             //Index 0 corresponds to main image

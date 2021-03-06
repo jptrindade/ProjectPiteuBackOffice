@@ -26,7 +26,7 @@ export default {
     data (){
         return{
 			deploy_to : process.env.VUE_APP_DATABASE,
-            options_to_export : [{"text":"Recipes","value":"recipe"},{"text":"Ingredients","value":"ingredient"},{"text":"Diets","value":"diet"},{"text":"DishTypes","value":"dishType"},{"text":"Utensils","value":"utensil"},{"text":"Categories","value":"category"},{"text":"Measures","value":"measure"},{"text":"Users","value":"user"}],
+            options_to_export : [{"text":"Recipes","value":"recipe"},{"text":"Ingredients","value":"ingredient"},{"text":"Diets","value":"diet"},{"text":"DishTypes","value":"dishType"},{"text":"Categories","value":"category"},{"text":"Measures","value":"measure"},{"text":"Users","value":"user"}],
             selected_option_to_export : null,
             isExportButtonDisabled : false
         }

@@ -236,7 +236,7 @@ import axios from 'axios'
       recipeToText(item){
         const recipe = item.recipe
         console.log(recipe)
-        return "<b>id:</b>" + recipe.id + "\n<b>name:</b> " + recipe.name + "\n<b>dish:</b> " + (recipe.dishType != null ? recipe.dishType.name : "null") + "\n<b>is_valid:</b> " + recipe.is_valid + "\n<b>readyIn:</b> " + recipe.readyInMinutes + "\n<b>prepareTime:</b> " + recipe.prepareInMinutes + "\n<b>description:</b> " + recipe.description + "\n<b>difficulty:</b> " + recipe.difficulty + "\n<b>serves:</b> " + recipe.serves + "\n<b>utensils:</b> " + recipe.utensils.map(u => u.name).join(', ') + "\n<b>ingredients:</b> " + recipe.ingredients.map(i => "" + i.quantity + " " + i.measureName + " " + i.ingredientName).join('; ') + "\n<b>steps:</b> " + recipe.instructions.length  
+        return "<b>id:</b>" + recipe.id + "\n<b>name:</b> " + recipe.name + "\n<b>dish:</b> " + (recipe.dishType != null ? recipe.dishType.name : "null") + "\n<b>is_valid:</b> " + recipe.is_valid + "\n<b>readyIn:</b> " + recipe.readyInMinutes + "\n<b>prepareTime:</b> " + recipe.prepareInMinutes + "\n<b>description:</b> " + recipe.description + "\n<b>difficulty:</b> " + recipe.difficulty + "\n<b>serves:</b> " + recipe.serves + "\n<b>ingredients:</b> " + recipe.ingredients.map(i => "" + i.quantity + " " + i.measureName + " " + i.ingredientName).join('; ') + "\n<b>steps:</b> " + recipe.instructions.length  
       }
     }
   }
