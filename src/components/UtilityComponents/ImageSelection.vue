@@ -105,9 +105,10 @@
 							<v-col cols="auto" v-for="(imageObj, index) in alternativeImages" :key="index">
 								<div class="img-wrap">
 									<v-icon dense @click="deleteAlternativeImage(index)" class="close">mdi-close</v-icon>
+									<v-icon dense @click="toggleImageIsEnabled(imageObj)" class="validate">mdi-eye</v-icon>
 									<v-icon small @click="openPhotoEditor(imageObj.url, false, index)" class="edit">mdi-wrench</v-icon>
 									<v-icon dense @click="swapImages(imageObj.url, false, index)" class="swap">mdi-swap-horizontal</v-icon>
-									<img height="150px" contain :src="imageObj.url"/>
+									<img height="150px" contain :src="imageObj.url" :style="[imageObj.enabled ? {'opacity' : 1 } : {'opacity' : 0.4}]"/>
 								</div>
 							</v-col>
 						</v-row>
@@ -121,9 +122,11 @@
 
 <script>
 
-var utils = require('../../utils');
+ 
 import VueCropper from 'vue-cropperjs';
 import 'cropperjs/dist/cropper.css';
+
+var utils = require('../../utils');
 
 export default {
 	name: "AddIngredientCore",
@@ -142,7 +145,7 @@ export default {
 			newFile: null,
 			mainUrl: "",
 			mnainFile: null,
-			alternativeImages : this.initialAlternativeImages, //List of {url, file}
+			alternativeImages : this.importInitialImages(this.initialAlternativeImages), //List of {url, file}
 			editingImage: false,
 
 			//Editor
@@ -219,6 +222,12 @@ export default {
 		deleteAlternativeImage(index){
 			this.alternativeImages.splice(index, 1)
 		},
+		toggleImageIsEnabled(image){
+			if(image.enabled)
+				image.enabled = !image.enabled
+			else
+				image["enabled"] = true
+		},
 		openPhotoEditor(url, isMainImage, imageIndex){
 			this.editingImage = true;
 			this.cropData.imageToCrop = url
@@ -285,6 +294,12 @@ export default {
 			} else {
 				this.showErr("Please choose one main image");
 			}
+		},
+		importInitialImages(images){
+			images.forEach(i => {
+				i["enabled"] = false
+			});
+			return images;
 		}
     },
 
@@ -306,10 +321,18 @@ export default {
     z-index: 100;
 }
 
+.img-wrap .validate {
+	color: red;
+    position: absolute;
+    top: 30px;
+    right: -25px;
+    z-index: 100;
+}
+
 .img-wrap .edit {
 	color: red;
     position: absolute;
-    top: 20px;
+    top: 65px;
     right: -18px;
     z-index: 100;
 }
@@ -317,7 +340,7 @@ export default {
 .img-wrap .swap {
 	color: red;
     position: absolute;
-    top: 40px;
+    top: 100px;
     right: -20px;
     z-index: 100;
 }

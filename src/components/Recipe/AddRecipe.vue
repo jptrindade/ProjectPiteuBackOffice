@@ -366,23 +366,18 @@ export default {
         const requestMeasure = axios.get(this.deploy_to + 'measure/', {headers: {
                 'Authorization': `${this.$store.getters.getTokenToSend}`
         }})
-
-        const requestCuisines = axios.get(this.deploy_to + 'utensil/', {headers: {
-                'Authorization': `${this.$store.getters.getTokenToSend}`
-        }})
         
         const requestDishes = axios.get(this.deploy_to + 'dishtype/',{headers: {
                 'Authorization': `${this.$store.getters.getTokenToSend}`
         }})
 
-        await axios.all([requestIngredient, requestMeasure, requestCuisines, requestDishes],{headers: {
+        await axios.all([requestIngredient, requestMeasure, requestDishes],{headers: {
                     'Authorization': `Token ${this.$store.getters.getToken}`
                 }})
             .then(axios.spread( (...responses) => {
                 this.possible_ingredients = responses[0].data
                 this.possible_measures = responses[1].data.results
-                this.possible_cuisines = responses[2].data.results
-                this.possible_dishes = responses[4].data.results
+                this.possible_dishes = responses[2].data.results
             })).catch(errors => {
                 console.log("ERROR request tables: " +  errors)
             })
@@ -435,8 +430,12 @@ export default {
             //Get all images as an internal url (S3)
             let uploadedImages = []
             for(const i of this.images){
-                let url = await this.generateImageUrl(i.url, i.file)
-                uploadedImages.push(url)
+
+                //Add alternative images only when enabled
+                if(uploadedImages.length == 0 || i.enabled){
+                    let url = await this.generateImageUrl(i.url, i.file)
+                    uploadedImages.push(url)
+                }
             }
             
             const mainImageUrl = uploadedImages.shift()
@@ -633,14 +632,6 @@ export default {
                 recipeIngredient.group = recipeIngredient.editData.group
                 this.togleIngredientEditMode(recipeIngredient)
             }
-        },
-        getCuisines() {
-            //Wait for server to respond
-            var wait = (ms) => new Promise((r) => setTimeout(r, ms));
-            wait(1000).then(() => {
-                return this.possible_cuisines;
-            });
-            return this.possible_cuisines;
         },
         incrementServes () {
             this.numberServes = parseInt(this.numberServes, 10) + 1
@@ -1110,7 +1101,7 @@ export default {
             }
         },
         newImage(url, file = null){
-            return {url: url, file: file}
+            return {url: url, file: file, enabled: false}
         },
         buildImages(mainUrl, allUrls){
             this.images = []
