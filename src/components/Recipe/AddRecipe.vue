@@ -542,7 +542,7 @@ export default {
         },
         sendUpdateRecipeRequest(recipe, id){
             recipe["id"] = id
-            axios.patch(this.deploy_to + 'recipe/', recipe, {headers: {
+            axios.patch(this.deploy_to + 'recipe/' + id + '/', recipe, {headers: {
                     'Authorization': `Token ${this.$store.getters.getToken}`}})
                 .then((response) => {
                     this.showSuccess("Recipe Updated Successfully ")
