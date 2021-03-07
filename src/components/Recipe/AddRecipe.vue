@@ -814,6 +814,7 @@ export default {
                 this.totalTime = recipe.readyInMinutes
                 this.description = recipe.description
                 this.added_ingredients = this.importAddedIngredients(recipe.ingredients)
+                this.sourceUrl = recipe.source_url
                 this.importInternalInstructions(recipe.instructions)
                 this.buildImages(recipe.image, recipe.alternativeImages)
             }
