@@ -78,7 +78,9 @@
 
                                     </v-textarea>
                                 </v-col>
-                                
+                                <v-col cols="12" class="pa-0 ma-0">
+                                        <v-text-field v-model="sourceUrl" label="External url source"></v-text-field>
+                                </v-col>
                                 <v-col cols="12">
                                     <b-alert variant="danger" v-if="this.err" show>{{this.err}}</b-alert>
                                     <b-alert variant="success" v-if="this.success" show>{{this.success}}</b-alert>
@@ -347,6 +349,7 @@ export default {
             newRecipeGroup: "",
             urlToLoadTmpImage: "",
             tmpFile: undefined,
+            sourceUrl: "", //For external urls
 
             //When add new ingredient popup appears
             popupShowAddIngredient: false,
@@ -454,6 +457,7 @@ export default {
                 readyInMinutes : this.totalTime,
                 recipeIngredients: this.parseRecipeIngredients(),
                 instructions: this.parseInstructions(),
+                source_url: this.sourceUrl,
                 is_valid : true
             }
 
@@ -807,6 +811,7 @@ export default {
                 this.totalTime = recipe.totalTime
                 this.numberServes = recipe.servings
                 this.description = recipe.description
+                this.sourceUrl = recipe.sourceUrl
                 this.buildImages(recipe.mainImageUrl, recipe.allImageUrls)
                
                 //Insert instructions

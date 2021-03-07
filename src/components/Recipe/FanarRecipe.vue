@@ -61,6 +61,7 @@ export default {
 				this.isLoading = false;
 				this.recipe = response.data
 				if(this.recipe){
+					this.recipe["sourceUrl"] = this.recipeUrl
 					this.$store.commit('newExternalRecipe', this.recipe)
 					this.$router.push("/addRecipe")
 				}
