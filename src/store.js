@@ -11,7 +11,8 @@ export default new Vuex.Store({
     userId : localStorage.getItem('userId') || "",
     userEmail : localStorage.getItem('userEmail') || "",
     editRecipeId : null,
-    externalRecipe : null
+    externalRecipe : null,
+    currentRecipe: null
   },
   mutations: {
     auth_request(state){
@@ -37,6 +38,9 @@ export default new Vuex.Store({
     },
     newExternalRecipe(state, recipe){
       state.externalRecipe = recipe
+    }, 
+    updateCurrentRecipe(state, recipe){
+      state.currentRecipe = recipe
     }
   },
   actions: {
@@ -88,6 +92,7 @@ export default new Vuex.Store({
     getUserEmail: state => state.userEmail,
     getUserId: state => state.userId,
     getTokenToSend: state => {return "Token "+state.token},
-    getExternalRecipe: state => state.externalRecipe
+    getExternalRecipe: state => state.externalRecipe,
+    getCurrentRecipe: state => state.currentRecipe
   }
 })

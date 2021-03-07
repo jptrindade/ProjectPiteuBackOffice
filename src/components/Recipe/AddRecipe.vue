@@ -81,12 +81,17 @@
                                 <v-col cols="12" class="pa-0 ma-0">
                                         <v-text-field v-model="sourceUrl" label="External url source"></v-text-field>
                                 </v-col>
+                                <v-col cols="12" justify="center">
+                                    <v-btn color="red lighten-4 mr-5" v-confirm="{ok: clearForms, message: 'Clearing recipe, are you sure?'}">
+                                        CLEAR
+                                    </v-btn>
+                                    <v-btn class="ml-5" color="green" v-confirm="{ok: submitRecipe, message: 'Are you sure?'}">
+                                        {{ submitButtonText() }}
+                                    </v-btn>
+                                </v-col>
                                 <v-col cols="12">
                                     <b-alert variant="danger" v-if="this.err" show>{{this.err}}</b-alert>
                                     <b-alert variant="success" v-if="this.success" show>{{this.success}}</b-alert>
-                                    <v-btn color="green" v-confirm="{ok: submitRecipe, message: 'Are you sure?'}">
-                                        {{ submitButtonText() }}
-                                    </v-btn>
                                 </v-col>
                             </v-row>
                         </v-container>
@@ -362,7 +367,49 @@ export default {
             currentImgHeight: 0
         }
     },
+    watch: {
+        added_ingredients : {
+            handler(val){
+                this.updateStoreCurrentRecipe()
+            },
+            deep: true
+        },
+        raw_instructions : {
+            handler(val){
+                this.updateStoreCurrentRecipe()
+            },
+            deep: true
+        },
+        recipeName : {
+            handler(val){
+                this.updateStoreCurrentRecipe()
+            },
+            deep: true
+        },
+        difficulty : {
+            handler(val){
+                this.updateStoreCurrentRecipe()
+            },
+            deep: true
+        },
+        images : {
+            handler(val){
+                this.updateStoreCurrentRecipe()
+            },
+            deep: true
+        }
+
+    },
     async mounted (){
+
+        //IMPORT FROM VUEX
+        if(this.verifyImportRecipe())
+            console.log("importing internal recipe")
+        else if (this.verifyFetchExternalRecipe()) 
+            console.log("importing external recipe")
+        else if (this.verifyCurrentRecipeFromStore())
+            console.log("restoring current recipe")
+
         const requestIngredient = axios.get(this.deploy_to + 'backoffice/ingredients/', {headers: {
                 'Authorization': `${this.$store.getters.getTokenToSend}`
         }} )
@@ -385,8 +432,6 @@ export default {
                 console.log("ERROR request tables: " +  errors)
             })
         
-        this.verifyImportRecipe();
-        this.verifyFetchExternalRecipe();
     },
     methods: {
         showErr(msg){
@@ -422,7 +467,10 @@ export default {
             this.measure = null
             this.quantity = null
             this.optional = false
+            this.sourceUrl = ""
+            this.raw_instructions = null
             this.resetIngredientsForm()
+            this.$store.commit('updateCurrentRecipe', null)
         },
         async submitRecipe(){
 
@@ -712,13 +760,32 @@ export default {
         getDifficultyValue(){
             return this.difficultyOptions.indexOf(this.difficulty) + 1;
         },
+        verifyCurrentRecipeFromStore(){
+            const currentRecipe = this.$store.getters.getCurrentRecipe
+            if(currentRecipe){
+                this.importId = currentRecipe.importId
+                this.recipeName = currentRecipe.recipeName
+                this.images = currentRecipe.images
+                this.description = currentRecipe.description
+                this.dish = currentRecipe.dish
+                this.difficulty = currentRecipe.difficulty
+                this.numberServes = currentRecipe.numberServes
+                this.prepTime = currentRecipe.prepTime
+                this.totalTime = currentRecipe.totalTime
+                this.added_ingredients = currentRecipe.added_ingredients
+                this.raw_instructions = currentRecipe.raw_instructions
+                this.sourceUrl = currentRecipe.sourceUrl
+            }
+        },
         verifyFetchExternalRecipe(){
             const externalRecipe = this.$store.getters.getExternalRecipe
             if(externalRecipe != null){
                 this.externalRecipe = externalRecipe
                 this.$store.commit('newExternalRecipe', null)  //RESET VALUE
                 this.importExternalRecipe()
+                return true
             }
+            return false
         },
         verifyImportRecipe(){
             const editRecipeId = this.$store.getters.getRecipeToEdit
@@ -726,7 +793,9 @@ export default {
                 this.importId = editRecipeId
                 this.$store.commit('editRecipe', null)  //RESET VALUE
                 this.importInternalRecipe()
+                return true
             }
+            return false
         },
         async importInternalRecipe(){
 
@@ -1128,6 +1197,23 @@ export default {
                 }
             }
             return null
+        },
+        updateStoreCurrentRecipe(){
+            const recipe = {
+                id: this.importId,
+                recipeName : this.recipeName,
+                images: this.images,
+                description : this.description,
+                dish: this.dish,
+                difficulty : this.difficulty,
+                numberServes : this.numberServes,
+                prepTime : this.prepTime,
+                totalTime : this.totalTime,
+                added_ingredients: this.added_ingredients,
+                raw_instructions: this.raw_instructions,
+                sourceUrl: this.sourceUrl
+            }
+            this.$store.commit('updateCurrentRecipe', recipe)
         }
     }
 }
