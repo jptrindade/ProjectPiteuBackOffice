@@ -110,58 +110,77 @@
                             <v-row>
                                 <v-col cols="12">
                                     <v-card>
-                                        <v-card-title>Add Ingredients</v-card-title>
-                                        <v-row no-gutters class="mx-3 my-0">
-                                            <v-col cols="3">
-                                                <v-select label="Measure" v-model="measure"
-                                                                            :items="getMeasures()"
-                                                                            item-text="name"
-                                                                            clearable
-                                                                            return-object>
-                                                </v-select>
+                                        <v-card-title>Add Ingredients
+                                            <v-col class="text-right">
+                                                <v-btn @click="showIngredientTextBox = !showIngredientTextBox" icon color="indigo"><v-icon>mdi-text-box-outline</v-icon></v-btn>
                                             </v-col>
-                                            <v-col cols="2">
-                                                <v-text-field label="Quantity" type="Number"  class="ml-3" v-model="quantity">
+                                        </v-card-title>
 
-                                                </v-text-field>
-                                            </v-col>
-                                            <v-col cols="6">
-                                                <v-autocomplete class="ml-3"
-                                                    v-model="currentIngredient"
-                                                    :items="getIngredients()"
-                                                    color="white"
-                                                    hide-no-data
-                                                    hide-selected
-                                                    item-text="name"
-                                                    label="Ingredients"
-                                                    placeholder="Type to search"
-                                                    return-object
-                                                ></v-autocomplete>
+                                        <v-row v-show="showIngredientTextBox" no-gutters class="mx-3 my-0">
+                                            <!-- ADD MASS INGREDIENTS AS TEXT BOX  -->
+                                            <v-col cols="11">
+                                                <v-textarea v-on:blur="replaceMeasuresInText()" auto-grow v-model="massIngredientsText"></v-textarea>
                                             </v-col>
                                             <v-col cols="1">
-                                                <v-checkbox v-model="optional" label="Opt"></v-checkbox>
+                                                <v-row justify="center">
+                                                    <v-btn @click="massIngredientsText = massIngredientsText.replace(/\(.*?\)/g,'')" icon><v-icon>mdi-content-cut</v-icon></v-btn>
+                                                </v-row>
                                             </v-col>
                                         </v-row>
-                                        <v-row no-gutters>
-                                            <v-col cols="12">
-                                                <v-btn icon color="grey" @click="toggleAddIngredientAdvOptions"><v-icon>mdi-arrow-expand-down</v-icon></v-btn>
-                                            </v-col>
+
+                                        <v-row no-gutters v-show="!showIngredientTextBox">
+                                             <!-- ADD INDIVIDUAL INGREDIENT  -->
+                                            <v-row class="mx-3 my-0">
+                                                <v-col cols="3">
+                                                    <v-select label="Measure" v-model="measure"
+                                                                                :items="getMeasures()"
+                                                                                item-text="name"
+                                                                                clearable
+                                                                                return-object>
+                                                    </v-select>
+                                                </v-col>
+                                                <v-col cols="2">
+                                                    <v-text-field label="Quantity" type="Number"  class="ml-3" v-model="quantity">
+
+                                                    </v-text-field>
+                                                </v-col>
+                                                <v-col cols="6">
+                                                    <v-autocomplete class="ml-3"
+                                                        v-model="currentIngredient"
+                                                        :items="getIngredients()"
+                                                        color="white"
+                                                        hide-no-data
+                                                        hide-selected
+                                                        item-text="name"
+                                                        label="Ingredients"
+                                                        placeholder="Type to search"
+                                                        return-object
+                                                    ></v-autocomplete>
+                                                </v-col>
+                                                <v-col cols="1">
+                                                    <v-checkbox v-model="optional" label="Opt"></v-checkbox>
+                                                </v-col>
+                                            </v-row>
+                                            <v-row no-gutters>
+                                                <v-col cols="12">
+                                                    <v-btn icon color="grey" @click="toggleAddIngredientAdvOptions"><v-icon>mdi-arrow-expand-down</v-icon></v-btn>
+                                                </v-col>
+                                            </v-row>
+                                            <v-row no-gutters class="mx-3 pa-0" v-if="expandAddIngredientOptions">
+                                                <v-col cols="12">
+                                                    <v-text-field label="Notes" v-model="ingredientNotes"></v-text-field>
+                                                </v-col>
+                                                <v-col cols="6">
+                                                    <v-select @change="changeIngredientGroup" clearable label="Select group" :items="recipeGroups">
+                                                        
+                                                    </v-select>
+                                                </v-col>
+                                                <v-col cols="6">
+                                                    <v-text-field class="mx-3" label="New Group" v-model="newRecipeGroup"></v-text-field>
+                                                    <v-btn @click="addNewGroup">New Group</v-btn>
+                                                </v-col>
+                                            </v-row>
                                         </v-row>
-                                        <v-row no-gutters class="mx-3 pa-0" v-if="expandAddIngredientOptions">
-                                            <v-col cols="12">
-                                                <v-text-field label="Notes" v-model="ingredientNotes"></v-text-field>
-                                            </v-col>
-                                            <v-col cols="6">
-                                                <v-select @change="changeIngredientGroup" clearable label="Select group" :items="recipeGroups">
-                                                    
-                                                </v-select>
-                                            </v-col>
-                                            <v-col cols="6">
-                                                <v-text-field class="mx-3" label="New Group" v-model="newRecipeGroup"></v-text-field>
-                                                <v-btn @click="addNewGroup">New Group</v-btn>
-                                            </v-col>
-                                        </v-row>
-                                            
                                         <v-row justify="center">
                                             <v-col cols="2">
                                                 <v-btn color="green" @click="addIngredient">Add</v-btn>
@@ -355,6 +374,8 @@ export default {
             urlToLoadTmpImage: "",
             tmpFile: undefined,
             sourceUrl: "", //For external urls
+            showIngredientTextBox: false,
+            massIngredientsText: "",
 
             //When add new ingredient popup appears
             popupShowAddIngredient: false,
@@ -469,6 +490,7 @@ export default {
             this.optional = false
             this.sourceUrl = ""
             this.raw_instructions = null
+            this.massIngredientsText = ""
             this.resetIngredientsForm()
             this.$store.commit('updateCurrentRecipe', null)
         },
@@ -620,6 +642,51 @@ export default {
             return true;
         },
         addIngredient(){
+            if(!this.showIngredientTextBox){
+                this.addSimpleIngredient();
+            } else {
+                this.addMassIngredientsFromText();
+            }
+        },
+        addMassIngredientsFromText(){
+            if(this.massIngredientsText == "")
+                return;
+            
+            var externalIngredientList = []
+            let splitIngredients = this.massIngredientsText.split('\n')
+            splitIngredients.forEach(iLine => {
+                iLine.trim()
+                let originalIngredientText = iLine
+
+                let quantityOptional = iLine.match(/\d+/)
+                let quantity = quantityOptional ? quantityOptional[0] : ''
+
+                iLine = iLine.replace(quantity, '').trimStart()
+                var measure = iLine.substring(0, iLine.indexOf(' '))
+                let measureMapping = this.getMeasureTextMapping();
+                if(measure && measureMapping[measure]){
+                    measure = measureMapping[measure]
+                } else if(measure){
+                    //measure not found in mapping, undo
+                    iLine = measure + " " + iLine
+                    measure = ''
+                }
+
+                iLine = iLine.replace(measure, '').trimStart()
+                let ingredient = iLine
+                let ingredientObj = {
+                    quantity: quantity,
+                    measure: measure.trim(),
+                    name: ingredient.trim(),
+                    notes: "",
+                    textIngredient: originalIngredientText
+                }
+                externalIngredientList.push(ingredientObj)
+            })
+            console.log(externalIngredientList)
+            this.importExternalIngredients({'ingredients': externalIngredientList})
+        },
+        addSimpleIngredient(){
 
             if(!this.validateIngredientFields(this.measure, this.quantity, this.currentIngredient)){
                 this.showAddedIngredientErr("Ingredient fields are incorrect")
@@ -925,7 +992,7 @@ export default {
                     let measureOptions = measureMapping[ingredientObject.measure]
                     let ingredientOptions = ingredientMapping[ingredientObject.name]
                     let ingredientGroup = key
-                    this.buildAddedIngredientFromExternalSource(measureOptions, ingredientObject.quantity, ingredientOptions, ingredientObject.measure, ingredientObject.name, ingredientObject.notes, ingredientGroup);
+                    this.buildAddedIngredientFromExternalSource(measureOptions, ingredientObject.quantity, ingredientOptions, ingredientObject.measure, ingredientObject.textIngredient ? ingredientObject.textIngredient : ingredientObject.name, ingredientObject.notes, ingredientGroup);
                 }, this)
             }
 
@@ -1215,6 +1282,30 @@ export default {
                 sourceUrl: this.sourceUrl
             }
             this.$store.commit('updateCurrentRecipe', recipe)
+        },
+        getMeasureTextMapping() {
+            let measureDict = {
+                "tablespoon": "tbsp",
+                "tablespoons": "tbsp",
+                "teaspoon": "tsp",
+                "teaspoons": "tsp",
+                "litres": "l",
+                "litre": "l",
+                "liter": "l",
+                "liters": "l",
+                "grams": "g",
+                "gram": "g"
+            }
+            return measureDict
+        },
+        replaceMeasuresInText(){
+            let splitStrings = this.massIngredientsText.split(' ')
+            let measureDict = this.getMeasureTextMapping()
+            splitStrings.forEach(s => {
+                if(measureDict[s]){
+                    this.massIngredientsText = this.massIngredientsText.replace(s, measureDict[s])
+                }
+            })
         }
     }
 }
