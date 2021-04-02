@@ -119,11 +119,11 @@
                                         <v-row v-show="showIngredientTextBox" no-gutters class="mx-3 my-0">
                                             <!-- ADD MASS INGREDIENTS AS TEXT BOX  -->
                                             <v-col cols="11">
-                                                <v-textarea v-on:blur="replaceMeasuresInText()" auto-grow v-model="massIngredientsText"></v-textarea>
+                                                <v-textarea auto-grow v-model="massIngredientsText"></v-textarea>
                                             </v-col>
                                             <v-col cols="1">
                                                 <v-row justify="center">
-                                                    <v-btn @click="massIngredientsText = massIngredientsText.replace(/\(.*?\)/g,'')" icon><v-icon>mdi-content-cut</v-icon></v-btn>
+                                                    <v-btn @click="massIngredientsText = massIngredientsText.replace(/\(.*?\)/g,''); replaceMeasuresInText();" icon><v-icon>mdi-content-cut</v-icon></v-btn>
                                                 </v-row>
                                             </v-col>
                                         </v-row>
@@ -1287,14 +1287,21 @@ export default {
             let measureDict = {
                 "tablespoon": "tbsp",
                 "tablespoons": "tbsp",
+                "tbsp": "tbsp",
                 "teaspoon": "tsp",
                 "teaspoons": "tsp",
+                "tsp": "tsp",
                 "litres": "l",
                 "litre": "l",
                 "liter": "l",
                 "liters": "l",
+                "l": "l",
                 "grams": "g",
-                "gram": "g"
+                "gram": "g",
+                "g": "g",
+                "ml": "ml",
+                "cup": "cup",
+                "kg": "kg"
             }
             return measureDict
         },
