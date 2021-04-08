@@ -50,7 +50,10 @@
                         <v-container class="mt-5 pa-0">
                             <v-row class="px-2">
                                 <v-col cols="12" class="pa-0 ma-0">
-                                    <v-text-field class="pa-0" label="Recipe Name" v-model="recipeName"></v-text-field>
+                                    <v-text-field class="pa-0" label="Recipe Name" v-on:blur="checkSimilarRecipeNames" v-model="recipeName"></v-text-field>
+                                </v-col>
+                                <v-col cols="12">
+                                    <b-alert variant="danger" v-if="this.similarNamesErr" show dismissible>{{this.similarNamesErr}}</b-alert>
                                 </v-col>
                                 <v-col cols="6" class="pa-0 ma-0">
                                     <v-select class="pa-0" label="Dish" v-model="dish"
@@ -363,6 +366,7 @@ export default {
             possible_measures:[],
             possible_dishes: [],
             err: null,
+            similarNamesErr: null,
             addedIngredientErr: null,
             success: null,
             importId: null,
@@ -459,6 +463,10 @@ export default {
           this.err = msg
           setTimeout(() => this.err = null, 5000);
         },
+        showSimilarNamesErr(msg){
+            this.similarNamesErr = msg
+            setTimeout(() => this.similarNamesErr = null, 15000);
+        },
         showAddedIngredientErr(msg){
           this.addedIngredientErr = msg
           setTimeout(() => this.addedIngredientErr = null, 2000);
@@ -534,31 +542,8 @@ export default {
             console.log(recipe);
 
             if(this.importId == null || this.importId < 1){ //NEW RECIPE
-
-
-                let similarRecipes = await this.checkSimilarRecipes(recipe.name)
-                if(similarRecipes.length > 0){
-                    //Require Confirmation
-
-                    this.$confirm(
-                        {
-                        title: 'There are similar recipes to: ' + recipe.name,
-                        message: similarRecipes.join(','),
-                        button: {
-                            no: 'Cancel',
-                            yes: 'Submit'
-                        },
-                        callback: confirm => {
-                            if (confirm) {
-                                this.sendNewRecipeRequest(recipe)
-                            }
-                        }
-                        }
-                    )
-                } else {    //No similar recipes, no confirmation
-                    this.sendNewRecipeRequest(recipe)
-                }
-            } else {
+                this.sendNewRecipeRequest(recipe)
+            } else {    //UPDATE
                 this.sendUpdateRecipeRequest(recipe, this.importId)
             }
         },
@@ -587,15 +572,16 @@ export default {
                 this.showErr("Can't insert this recipe")
             })
         },
-        async checkSimilarRecipes(name){
-            const recipesBySimilarTitle = await getSimilarRecipesByTitle(name, this.deploy_to, `Token ${this.$store.getters.getToken}`)
-            const suspectRecipes = recipesBySimilarTitle
-            let similarRecipes = []
+        async checkSimilarRecipeNames(){
+            const suspectRecipes = await getSimilarRecipesByTitle(this.recipeName, this.deploy_to, `Token ${this.$store.getters.getToken}`)
+            if(suspectRecipes){
+                let similarRecipes = suspectRecipes.filter(r => r.similarity >= 0.4).map(r => r.name)
 
-            if(suspectRecipes)
-                similarRecipes = suspectRecipes.filter(r => r.similarity >= 0.35).map(r => r.name)
-            
-            return similarRecipes;
+                if(Array.isArray(similarRecipes) && similarRecipes.length){
+                    console.log(similarRecipes)
+                    this.showSimilarNamesErr("SIMILAR RECIPES: " + similarRecipes.join(', '), 5 * 60 * 1000)
+                }
+            }
         },
         //Used to tmp store downloaded external images
         setLocalUrl(url){
@@ -850,6 +836,7 @@ export default {
                 this.externalRecipe = externalRecipe
                 this.$store.commit('newExternalRecipe', null)  //RESET VALUE
                 this.importExternalRecipe()
+                this.checkSimilarRecipeNames()
                 return true
             }
             return false
