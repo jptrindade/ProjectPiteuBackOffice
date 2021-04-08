@@ -978,7 +978,7 @@ export default {
                 value.forEach(function(ingredientObject) {
                     let measureOptions = measureMapping[ingredientObject.measure]
                     let ingredientOptions = ingredientMapping[ingredientObject.name]
-                    let ingredientGroup = key
+                    let ingredientGroup = key.replace(/[^a-zA-Z -]/g,"")
                     this.buildAddedIngredientFromExternalSource(measureOptions, ingredientObject.quantity, ingredientOptions, ingredientObject.measure, ingredientObject.textIngredient ? ingredientObject.textIngredient : ingredientObject.name, ingredientObject.notes, ingredientGroup);
                 }, this)
             }
@@ -1073,7 +1073,7 @@ export default {
                     //Group name is between # and \n
                     let endOfGroupName = group.indexOf("\n")
                     endOfGroupName = endOfGroupName > 0 ? endOfGroupName : Number.MAX_VALUE
-                    groupName = group.substring(1, endOfGroupName)
+                    groupName = group.substring(1, endOfGroupName).replace(/[^a-zA-Z -]/g,"");
                     group = group.substring(endOfGroupName) //extract group name from group
                 }
 
