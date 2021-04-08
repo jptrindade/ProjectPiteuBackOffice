@@ -459,9 +459,9 @@ export default {
         
     },
     methods: {
-        showErr(msg){
+        showErr(msg, timeout=5000){
           this.err = msg
-          setTimeout(() => this.err = null, 5000);
+          setTimeout(() => this.err = null, timeout);
         },
         showSimilarNamesErr(msg){
             this.similarNamesErr = msg
@@ -556,8 +556,13 @@ export default {
                     this.clearForms()
                 })
                 .catch(errors => {
-                    console.log(errors)
-                    this.showErr("Error updating recipe: " + errors)
+                    if(errors.response){
+                        console.log(errors.response.data)
+                        this.showErr("Error on insert due to fields: " + Object.keys(errors.response.data).join(', '), 10000)
+                    }
+                    else {
+                        this.showErr("Error updating recipe: unknown")
+                    }
                 })
         },
         async sendNewRecipeRequest(recipe){
@@ -568,8 +573,12 @@ export default {
                 this.clearForms()
             })
             .catch(errors => {
-                console.log("Tried to create recipe, error: " + errors)
-                this.showErr("Can't insert this recipe")
+                if(errors.response){
+                    console.log(errors.response.data)
+                    this.showErr("Error on insert due to fields: " + Object.keys(errors.response.data).join(', '), 10000)
+                } else {
+                    this.showErr("Error inserting recipe: unknown")
+                }
             })
         },
         async checkSimilarRecipeNames(){
